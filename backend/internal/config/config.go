@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+// DefaultCORSOrigin is used when APP_CORS_ORIGINS is empty or unset.
+const DefaultCORSOrigin = "http://localhost:28031"
+
 // Config 集中解析全部环境变量配置。
 type Config struct {
 	AppEnv             string
@@ -39,7 +42,7 @@ func Load() *Config {
 		RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", 120),
 		UploadDir:          getEnv("UPLOAD_DIR", "./uploads"),
 		UploadMaxMB:        int64(getEnvInt("UPLOAD_MAX_MB", 10)),
-		CORSOrigins:        parseCSV(getEnv("APP_CORS_ORIGINS", "")),
+		CORSOrigins:        parseCORSOrigins(getEnv("APP_CORS_ORIGINS", "")),
 	}
 }
 
@@ -72,11 +75,20 @@ func getEnvInt(key string, def int) int {
 
 func parseCSV(s string) []string {
 	parts := strings.Split(s, ",")
-	var out []string
+	out := make([]string, 0, len(parts))
 	for _, p := range parts {
 		if v := strings.TrimSpace(p); v != "" {
 			out = append(out, v)
 		}
 	}
 	return out
+}
+
+// parseCORSOrigins 解析 APP_CORS_ORIGINS，空输入时回退到默认来源，保证永不为空。
+func parseCORSOrigins(s string) []string {
+	origins := parseCSV(s)
+	if len(origins) == 0 {
+		return []string{DefaultCORSOrigin}
+	}
+	return origins
 }
