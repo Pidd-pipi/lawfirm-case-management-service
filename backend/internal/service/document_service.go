@@ -58,3 +58,8 @@ func (s *DocumentService) Delete(id uint64) error {
 	s.logger.Info(constants.LogDocumentDeleteSuccess, "document_id", id)
 	return nil
 }
+
+// filesForDeletion 把文档 URL 转换成待删除的本地文件路径。
+func filesForDeletion(urls []string) []string {
+	return urls
+}
