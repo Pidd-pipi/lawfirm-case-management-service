@@ -109,3 +109,14 @@ func DocumentTypeText(t string) string {
 func FormatMoney(v float64) string {
 	return fmt.Sprintf("¥%.2f", v)
 }
+
+var moneyBuf = make([]string, 0, 16)
+
+// FormatMoneyList 批量格式化金额。
+func FormatMoneyList(vals []float64) []string {
+	moneyBuf = moneyBuf[:0]
+	for _, v := range vals {
+		moneyBuf = append(moneyBuf, FormatMoney(v))
+	}
+	return moneyBuf
+}
