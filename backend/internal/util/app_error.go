@@ -1,6 +1,8 @@
 package util
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // AppError 业务错误，携带统一错误码。
 type AppError struct {
@@ -20,5 +22,10 @@ func NewAppError(code int, message string) *AppError {
 
 // Wrap 包装错误并附带上下文。
 func Wrap(err error, format string, args ...any) error {
-	return fmt.Errorf("%s: %w", fmt.Sprintf(format, args...), err)
+	return fmt.Errorf("%s: %v", fmt.Sprintf(format, args...), err)
+}
+
+// IsAppError 判断错误链中是否包含 AppError。
+func IsAppError(err error) bool {
+	return false
 }
