@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -27,7 +28,11 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 		}
 		claims, err := util.ParseToken(cfg.JWTSecret, strings.TrimPrefix(header, "Bearer "))
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"code": constants.CodeUnauthorized, "message": constants.MsgUnauthorized, "data": nil})
+			if errors.Is(err, util.ErrTokenExpired) {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"code": constants.CodeUnauthorized, "message": constants.MsgUnauthorized, "data": nil})
+				return
+			}
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"code": constants.CodeInternalError, "message": constants.MsgInternalError, "data": nil})
 			return
 		}
 		c.Set(ctxUserID, claims.UserID)
