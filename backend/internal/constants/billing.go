@@ -20,7 +20,7 @@ const (
 )
 
 // BillingStatusValues 全部账单状态值。
-var BillingStatusValues = []string{BillingStatusPending, BillingStatusPaid, BillingStatusVoid}
+var BillingStatusValues = []string{BillingStatusPending, BillingStatusPaid, BillingStatusInvoiced, BillingStatusVoid}
 
 // IsValidBillingType 校验费用类型。
 func IsValidBillingType(s string) bool {
@@ -43,8 +43,23 @@ func IsValidBillingStatus(s string) bool {
 }
 
 // BillingStatusTransitions 返回账单状态机迁移表。
+// 状态流转：pending -> paid -> invoiced；任意非 void 状态均可 -> void；void 为终态，不可再流转。
+// 注意：未支付（pending）的账单不能直接开票，必须先支付（paid）。
 func BillingStatusTransitions() map[string]map[string]bool {
-	return nil
+	return map[string]map[string]bool{
+		BillingStatusPending: {
+			BillingStatusPaid: true,
+			BillingStatusVoid: true,
+		},
+		BillingStatusPaid: {
+			BillingStatusInvoiced: true,
+			BillingStatusVoid:    true,
+		},
+		BillingStatusInvoiced: {
+			BillingStatusVoid: true,
+		},
+		BillingStatusVoid: {},
+	}
 }
 
 // DocumentFileType 文档类型枚举。

@@ -127,23 +127,24 @@ func (s *BillingService) Summary() (map[string]float64, error) {
 }
 
 // billingStatusCanFlow 账单状态机迁移校验。
+// 状态流转：pending -> paid -> invoiced；任意非 void 状态均可 -> void；void 为终态。
+// 未支付（pending）的账单不能直接开票，必须先变为 paid 才允许 invoiced。
 func billingStatusCanFlow(from, to string) bool {
+	if from == constants.BillingStatusVoid {
+		return false
+	}
 	if to == constants.BillingStatusVoid {
 		return true
 	}
-
 	if to == constants.BillingStatusPaid {
-		return from == constants.BillingStatusInvoiced
+		return from == constants.BillingStatusPending
 	}
-
 	if to == constants.BillingStatusInvoiced {
-		return from != constants.BillingStatusVoid
+		return from == constants.BillingStatusPaid
 	}
-
 	if to == constants.BillingStatusPending {
-		return from == constants.BillingStatusVoid
+		return false
 	}
-
 	return false
 }
 
