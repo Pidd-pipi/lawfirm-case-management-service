@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 
@@ -29,7 +30,7 @@ func (h *UploadHandler) UploadFile(c *gin.Context) {
 		Fail(c, http.StatusBadRequest, constants.CodeBadRequest, "Upload file: missing file")
 		return
 	}
-	url, err := util.SaveUploadedFile(h.cfg.UploadDir, h.cfg.UploadMaxMB, file)
+	url, err := util.SaveUploadedFile(context.Background(), h.cfg.UploadDir, h.cfg.UploadMaxMB, file)
 	if err != nil {
 		h.logger.Error(constants.LogUploadFileFailed, "error", err.Error())
 		Fail(c, http.StatusBadRequest, constants.CodeBadRequest, "Upload file failed: "+err.Error())
