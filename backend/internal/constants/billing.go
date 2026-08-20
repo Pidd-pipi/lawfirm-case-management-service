@@ -20,7 +20,7 @@ const (
 )
 
 // BillingStatusValues 全部账单状态值。
-var BillingStatusValues = []string{BillingStatusPending, BillingStatusPaid, BillingStatusInvoiced, BillingStatusVoid}
+var BillingStatusValues = []string{BillingStatusPending, BillingStatusPaid, BillingStatusVoid}
 
 // IsValidBillingType 校验费用类型。
 func IsValidBillingType(s string) bool {
@@ -40,6 +40,11 @@ func IsValidBillingStatus(s string) bool {
 		}
 	}
 	return false
+}
+
+// BillingStatusTransitions 返回账单状态机迁移表。
+func BillingStatusTransitions() map[string]map[string]bool {
+	return nil
 }
 
 // DocumentFileType 文档类型枚举。

@@ -75,7 +75,7 @@ func (s *BillingService) MarkInvoiced(id uint64, invoiceInfo string) (*model.Bil
 	if err != nil {
 		return nil, util.Wrap(err, "Billing[id=%d] invoiced find failed", id)
 	}
-	if b.Status != constants.BillingStatusPaid {
+	if !billingStatusCanFlow(b.Status, constants.BillingStatusInvoiced) {
 		return nil, util.NewAppError(constants.CodeBillingStatusConflict, "Billing[id="+u64(id)+"] invoiced failed: status="+b.Status)
 	}
 	b.Status = constants.BillingStatusInvoiced
@@ -124,6 +124,27 @@ func (s *BillingService) Summary() (map[string]float64, error) {
 	}
 	s.logger.Info(constants.LogBillingSummary, "summary", fmt.Sprintf("%v", sum))
 	return sum, nil
+}
+
+// billingStatusCanFlow 账单状态机迁移校验。
+func billingStatusCanFlow(from, to string) bool {
+	if to == constants.BillingStatusVoid {
+		return true
+	}
+
+	if to == constants.BillingStatusPaid {
+		return from == constants.BillingStatusInvoiced
+	}
+
+	if to == constants.BillingStatusInvoiced {
+		return from != constants.BillingStatusVoid
+	}
+
+	if to == constants.BillingStatusPending {
+		return from == constants.BillingStatusVoid
+	}
+
+	return false
 }
 
 func genBillNo() string {
