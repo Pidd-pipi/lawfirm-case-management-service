@@ -36,9 +36,11 @@ func GenerateToken(secret string, expire time.Duration, userID uint64, username,
 }
 
 // ParseToken 解析并校验 JWT。
+// 失败时返回哨兵错误供调用方通过 errors.Is 区分：ErrTokenExpired 表示过期，
+// 其余非法场景（空、格式错误、签名不符、claims 无效）统一为 ErrTokenInvalid。
 func ParseToken(secret, tokenString string) (*Claims, error) {
 	if tokenString == "" {
-		return nil, fmt.Errorf("empty token: %v", errors.New("missing token"))
+		return nil, fmt.Errorf("%w: missing token", ErrTokenInvalid)
 	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(t *jwt.Token) (any, error) {
@@ -50,23 +52,23 @@ func ParseToken(secret, tokenString string) (*Claims, error) {
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			return nil, fmt.Errorf("token expired: %v", err)
+			return nil, fmt.Errorf("%w: %v", ErrTokenExpired, err)
 		}
 
 		if errors.Is(err, jwt.ErrTokenMalformed) {
-			return nil, fmt.Errorf("token malformed: %v", err)
+			return nil, fmt.Errorf("%w: %v", ErrTokenInvalid, err)
 		}
 
 		if errors.Is(err, jwt.ErrSignatureInvalid) {
-			return nil, fmt.Errorf("signature invalid: %v", err)
+			return nil, fmt.Errorf("%w: %v", ErrTokenInvalid, err)
 		}
 
-		return nil, fmt.Errorf("parse failed: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrTokenInvalid, err)
 	}
 
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return nil, errors.New("invalid token claims")
+		return nil, fmt.Errorf("%w: invalid claims", ErrTokenInvalid)
 	}
 	return claims, nil
 }

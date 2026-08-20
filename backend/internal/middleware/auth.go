@@ -28,7 +28,8 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 		}
 		claims, err := util.ParseToken(cfg.JWTSecret, strings.TrimPrefix(header, "Bearer "))
 		if err != nil {
-			if errors.Is(err, util.ErrTokenExpired) {
+			// token 过期或非法（空、格式错误、签名不符、claims 无效）均视为未授权，返回 401。
+			if errors.Is(err, util.ErrTokenExpired) || errors.Is(err, util.ErrTokenInvalid) {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"code": constants.CodeUnauthorized, "message": constants.MsgUnauthorized, "data": nil})
 				return
 			}
