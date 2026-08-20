@@ -2,6 +2,7 @@ package service
 
 import (
 	"log/slog"
+	"strings"
 	"time"
 
 	"cylawcase/internal/constants"
@@ -60,6 +61,17 @@ func (s *DocumentService) Delete(id uint64) error {
 }
 
 // filesForDeletion 把文档 URL 转换成待删除的本地文件路径。
+// 只保留以 /uploads/ 前缀开头的 URL，并去掉该前缀得到真实文件名；
+// 外链或非法路径直接跳过，避免误删本地文件。
 func filesForDeletion(urls []string) []string {
-	return urls
+	const prefix = "/uploads/"
+	paths := make([]string, 0, len(urls))
+	for _, u := range urls {
+		name, ok := strings.CutPrefix(u, prefix)
+		if !ok || name == "" {
+			continue
+		}
+		paths = append(paths, name)
+	}
+	return paths
 }
