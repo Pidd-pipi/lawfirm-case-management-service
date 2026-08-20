@@ -149,7 +149,9 @@ func canFlow(from, to string) bool {
 }
 
 func jsonCoLawyers(ids []uint64) model.CoLawyerJSON {
-	raw, _ := json.Marshal(ids)
+	// 去掉 0 值后去重，避免多次保存导致协办律师名单串号。
+	deduped := util.Unique(util.Filter(ids, func(v uint64) bool { return v != 0 }))
+	raw, _ := json.Marshal(deduped)
 	return model.CoLawyerJSON(raw)
 }
 
