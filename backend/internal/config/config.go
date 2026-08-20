@@ -39,7 +39,7 @@ func Load() *Config {
 		RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", 120),
 		UploadDir:          getEnv("UPLOAD_DIR", "./uploads"),
 		UploadMaxMB:        int64(getEnvInt("UPLOAD_MAX_MB", 10)),
-		CORSOrigins:        parseCSV(getEnv("APP_CORS_ORIGINS", "http://localhost:28031")),
+		CORSOrigins:        parseCSV(getEnv("APP_CORS_ORIGINS", "")),
 	}
 }
 
@@ -72,7 +72,7 @@ func getEnvInt(key string, def int) int {
 
 func parseCSV(s string) []string {
 	parts := strings.Split(s, ",")
-	out := make([]string, 0, len(parts))
+	var out []string
 	for _, p := range parts {
 		if v := strings.TrimSpace(p); v != "" {
 			out = append(out, v)

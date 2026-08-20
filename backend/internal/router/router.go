@@ -49,6 +49,7 @@ func (r *Router) Setup() *gin.Engine {
 	engine.Use(middleware.RequestLogger(r.logger))
 	engine.Use(middleware.ErrorHandler(r.logger))
 	engine.Use(middleware.CORS(r.cfg))
+	engine.Use(middleware.OriginGuard(r.cfg))
 	engine.Use(middleware.JWTConfig(r.cfg))
 	engine.Use(middleware.AuditLog(r.db, r.logger))
 
