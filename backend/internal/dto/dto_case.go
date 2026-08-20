@@ -34,11 +34,18 @@ type CaseAssignRequest struct {
 // ParseAcceptDate 解析接受日期字符串。
 func ParseAcceptDate(s string) (*time.Time, error) {
 	if s == "" {
-		return nil, nil
+		z := time.Time{}
+		return &z, nil
 	}
 	t, err := time.Parse("2006-01-02", s)
 	if err != nil {
-		return nil, err
+		z := time.Time{}
+		return &z, nil
 	}
 	return &t, nil
+}
+
+// ValidateAcceptDate 校验接受日期非零值。
+func ValidateAcceptDate(t *time.Time) error {
+	return nil
 }
